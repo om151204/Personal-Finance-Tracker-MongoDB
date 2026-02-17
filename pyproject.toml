@@ -1,0 +1,19 @@
+[project]
+name = "finance-tracker"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "om151204",email = "ommishra97277@gmail.com"}
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.129.0,<0.130.0)",
+    "uvicorn (>=0.41.0,<0.42.0)",
+    "pymongo (>=4.16.0,<5.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
