@@ -4,6 +4,11 @@ from finance.database import db
 router = APIRouter()
 
 def serialize(transaction):
+    """
+    This is a helper function to serialize a transaction
+    :param transaction: dictionary with transaction info
+    :return: Formatted print
+    """
     return {
         "id": str(transaction["_id"]),
         "title": transaction["title"],
@@ -16,6 +21,11 @@ def serialize(transaction):
     }
 
 def serialize_category(category):
+    """
+        This is a helper function to serialize a category
+        :param category: dictionary with transaction info
+        :return: Formatted print
+        """
     return {
         "id": str(category["_id"]),
         "name": category["name"]
@@ -28,6 +38,41 @@ def create_transaction(transaction:Transaction):
         return serialize(created_transaction)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/summary")
+def get_summary(month: str):
+    try:
+        year, month_number = map(int, month.split("-"))
+    except:
+        raise HTTPException(
+            status_code=400,
+            detail="Month format must be YYYY-MM"
+        )
+
+    summary = db.get_monthly_summary(year, month_number)
+
+    if not summary:
+        raise HTTPException(
+            status_code=404,
+            detail="No transactions found for this month"
+        )
+
+    totals = summary.get("totals", [])
+    category_data = summary.get("category_breakdown", [])
+    highest = summary.get("highest_expense", [])
+
+    total_income = totals[0]["total_income"] if totals else 0
+    total_expense = totals[0]["total_expense"] if totals else 0
+
+    net_balance = total_income - total_expense
+
+    return {
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "net_balance": net_balance,
+        "category_breakdown": category_data,
+        "highest_expense": highest[0] if highest else None
+    }
 
 @router.get("/search",status_code=status.HTTP_200_OK)
 def search_transactions(query:str):
@@ -44,19 +89,21 @@ def get_transactions(page_size:int=Query(10,le=100)):
     return [serialize(t) for t in transactions]
 
 @router.get("/{id}",status_code=status.HTTP_200_OK)
-def get_transaction(id:str):
+def get_transaction(id_:str):
     try:
-        transaction = db.get_transaction_by_id(id)
+        transaction = db.get_transaction_by_id(id_)
         if not transaction:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Transaction not found")
         return serialize(transaction)
     except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid transaction ID")
 
+
+
 @router.delete("/{id}",status_code=status.HTTP_200_OK)
-def delete_transaction(id:str):
+def delete_transaction(id_:str):
     try:
-        res = db.delete_transaction(id)
+        res = db.delete_transaction(id_)
         return res
     except Exception:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid transaction ID")
@@ -73,9 +120,9 @@ def bulk_delete_transaction(category:str):
         return {"Message":"Transaction could not be deleted"}
 
 @router.patch("/{id}",status_code=status.HTTP_200_OK)
-def update_transaction(id:str,payload:TransactionUpdate):
+def update_transaction(id_:str,payload:TransactionUpdate):
     try:
-        updated_transaction = db.update_transaction(id,payload.model_dump(exclude_unset=True))
+        updated_transaction = db.update_transaction(id_,payload.model_dump(exclude_unset=True))
         if not updated_transaction:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Transaction not found")
         return serialize(updated_transaction)
