@@ -14,6 +14,7 @@ A production-ready, asynchronous REST API built with **FastAPI** and **MongoDB**
 
 ## Tech Stack
 
+- **Python**: [Python v3.13](https://www.python.org)
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com)
 - **Database**: [MongoDB](https://www.mongodb.com)
 - **Validation**: [Pydantic v2](https://docs.pydantic.dev)
