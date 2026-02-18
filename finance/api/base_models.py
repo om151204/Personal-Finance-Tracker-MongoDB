@@ -72,3 +72,14 @@ class Category(BaseModel):
         if v not in ["income", "expense", "both"]:
             raise ValueError("Type must be income, expense or both")
         return v
+
+class CategoryPatch(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    description: Optional[str] = None
+
+    @field_validator("type")
+    def validate_type(cls, v):
+        if v not in ["income", "expense", "both"]:
+            raise ValueError("Type must be income, expense or both")
+        return v
