@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Query
-from finance.api.base_models import Transaction,TransactionUpdate,Category
+from finance.api.base_models import Transaction,TransactionUpdate,Category,CategoryPatch
 from finance.database import db
 router = APIRouter()
 
@@ -83,7 +83,7 @@ def update_transaction(id:str,payload:TransactionUpdate):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid transaction ID")
 
 
-@router.post("/get_transactions/", status_code=status.HTTP_201_CREATED,tags=["categories"])
+@router.post("/post_categories/", status_code=status.HTTP_201_CREATED,tags=["categories"])
 def create_category(category: Category):
     existing = db.cat_collection.find_one({"name": category.name})
     if existing:
@@ -98,17 +98,17 @@ def create_category(category: Category):
     return serialize_category(created)
 
 
-@router.get("/transactions/",tags=["categories"])
+@router.get("/get_categories/",tags=["categories"])
 def get_categories():
     categories = db.get_categories()
-    return [serialize(cat) for cat in categories]
+    return [serialize_category(cat) for cat in categories]
 
 
-# PATCH
-@router.patch("/transactions/{name}",tags=["categories"])
-def update_category(name: str, payload: Category):
 
-    update_data = payload.model_dump()
+@router.patch("/categories/{name}",tags=["categories"])
+def update_category(name: str, payload: CategoryPatch):
+
+    update_data = payload.model_dump(exclude_unset=True)
 
     updated = db.update_category(name, update_data)
 
@@ -118,10 +118,10 @@ def update_category(name: str, payload: Category):
             detail="Category not found"
         )
 
-    return serialize(updated)
+    return serialize_category(updated)
 
 
-# DELETE
+
 @router.delete("/transactions/{name}",tags=["categories"])
 def delete_category(name: str):
 

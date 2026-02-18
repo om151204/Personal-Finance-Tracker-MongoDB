@@ -1,3 +1,3 @@
-from finance.api.transactions import router
+from finance.api.routes import router
 
 __all__ = ["router"]
