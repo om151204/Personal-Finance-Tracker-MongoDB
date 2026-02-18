@@ -34,7 +34,7 @@ A production-ready, asynchronous REST API built with **FastAPI** and **MongoDB**
 
 ---
 
-## 🔍 Indexing Strategy
+## Indexing Strategy
 Indexes are created programmatically on startup using `Motor`.
 
 | Index | Collection | Type | Purpose |
